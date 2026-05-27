@@ -4,6 +4,14 @@ import Account from "./Account";
 import Auth from "./Auth";
 import { supabase } from "./lib/supabase";
 
+import * as Linking from "expo-linking";
+
+useEffect(() => {
+  Linking.getInitialURL().then((url) => {
+    if (url) supabase.auth.exchangeCodeForSession(url);
+  });
+}, []);
+
 export default function Index() {
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | undefined>(undefined);
