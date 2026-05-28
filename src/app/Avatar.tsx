@@ -22,21 +22,13 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
 
   async function downloadImage(path: string) {
     try {
-      const { data, error } = await supabase.storage
-        .from("avatars")
-        .download(path);
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
 
-      if (error) {
-        throw error;
-      }
-
-      const fr = new FileReader();
-      fr.readAsDataURL(data);
-      fr.onload = () => {
-        setAvatarUrl(fr.result as string);
-      };
+      console.log("Public URL:", data.publicUrl); // ← add this
+      setAvatarUrl(data.publicUrl);
+      console.log("avatarUrl state set to:", data.publicUrl); // ← add this
     } catch (error: any) {
-      console.log("Error downloading image: ", error.message);
+      console.log("Error getting image URL: ", error.message);
     }
   }
 
@@ -105,7 +97,7 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
       )}
       <View>
         <TouchableOpacity
-          style={[styles.button, uploading && styles.buttonDisabled]}
+          style={[styles.primaryButton, uploading && styles.buttonDisabled]}
           onPress={uploadAvatar}
           disabled={uploading}
         >

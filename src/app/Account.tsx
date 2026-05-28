@@ -81,12 +81,13 @@ export default function Account({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.root}>
       <View>
         <Avatar
           size={200}
           url={avatarUrl}
           onUpload={(url: string) => {
+            console.log("Uploaded path:", url);
             setAvatarUrl(url);
             updateProfile({ username, website, avatar_url: url });
           }}
@@ -120,7 +121,7 @@ export default function Account({
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          style={[styles.primaryButton, loading && styles.buttonDisabled]}
           onPress={() =>
             updateProfile({ username, website, avatar_url: avatarUrl })
           }
@@ -134,7 +135,7 @@ export default function Account({
 
       <View style={styles.verticallySpaced}>
         <TouchableOpacity
-          style={styles.button}
+          style={styles.secondaryButton}
           onPress={() => supabase.auth.signOut()}
         >
           <Text style={styles.buttonText}>Sign Out</Text>

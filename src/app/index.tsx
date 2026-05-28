@@ -47,7 +47,7 @@ export default function Index() {
   }, []);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       {userId ? (
         <Account key={userId} userId={userId} email={email} />
       ) : (
