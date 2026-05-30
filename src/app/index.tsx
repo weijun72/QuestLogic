@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { View } from "react-native";
-import Account from "../components/Account";
 import Auth from "../components/Auth";
 import { supabase } from "./lib/supabase";
 
-import * as Linking from "expo-linking";
-
 export default function Index() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | undefined>(undefined);
+  const router = useRouter();
 
   useEffect(() => {
     Linking.getInitialURL().then((url) => {
@@ -21,43 +19,26 @@ export default function Index() {
 
     return () => sub.remove();
   }, []);
+
   useEffect(() => {
-    // Fetch current user
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      const user = data?.user ?? null;
-      if (user) {
-        setUserId(user.id);
-        setEmail(user.email ?? undefined);
-      }
+      if (data?.user) router.replace("/(tabs)/home");
     };
     fetchUser();
 
-    // Listen for auth state changes
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user ?? null;
-      if (user) {
-        setUserId(user.id);
-        setEmail(user.email ?? undefined);
-      } else {
-        setUserId(null);
-        setEmail(undefined);
+      if (session?.user) {
+        router.replace("/(tabs)/home");
       }
     });
 
-    return () => {
-      // unsubscribe listener
-      data.subscription?.unsubscribe?.();
-    };
+    return () => data.subscription?.unsubscribe?.();
   }, []);
 
   return (
     <View style={{ flex: 1 }}>
-      {userId ? (
-        <Account key={userId} userId={userId} email={email} />
-      ) : (
-        <Auth />
-      )}
+      <Auth />
     </View>
   );
 }
