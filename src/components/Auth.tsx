@@ -1,17 +1,17 @@
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { appStyles } from "./lib/styles";
-import { supabase } from "./lib/supabase";
+import { appStyles } from "../app/lib/styles";
+import { supabase } from "../app/lib/supabase";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -41,6 +41,7 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
+    else Alert.alert("Check your email for the confirmation link!");
     setLoading(false);
   }
 

@@ -4,10 +4,12 @@ export const appStyles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#fff4e9",
+    flexGrow: 1,
   },
   container: {
     marginTop: 40,
     padding: 12,
+    flexGrow: 1,
   },
   imageContainer: {
     width: "100%",

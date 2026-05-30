@@ -1,8 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
-import { appStyles } from "./lib/styles";
-import { supabase } from "./lib/supabase";
+import { appStyles } from "../app/lib/styles";
+import { supabase } from "../app/lib/supabase";
 
 interface Props {
   size: number;
@@ -22,11 +22,14 @@ export default function Avatar({ url, size = 150, onUpload }: Props) {
 
   async function downloadImage(path: string) {
     try {
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 604800); // valid for 7 days
 
-      console.log("Public URL:", data.publicUrl); // ← add this
-      setAvatarUrl(data.publicUrl);
-      console.log("avatarUrl state set to:", data.publicUrl); // ← add this
+      if (error) throw error;
+
+      console.log("Signed URL:", data.signedUrl);
+      setAvatarUrl(data.signedUrl);
     } catch (error: any) {
       console.log("Error getting image URL: ", error.message);
     }

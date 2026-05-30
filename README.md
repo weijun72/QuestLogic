@@ -1,3 +1,28 @@
+Target Level of Achievement (LoA)
+
+We are aiming for <Apollo 11>.
+
+Justification:
+
+Our application includes a full-stack implementation with frontend, backend, authentication, and database integration.
+We are implementing user authentication and persistent cloud storage.
+The project also includes user testing, iterative improvements, and deployment.
+Additional extension features such as notifications and analytics support a higher LoA.
+
+Milestone 1:
+
+Features:
+
+- User authenication
+- Login/Register page
+- Homepage
+- Database for user info
+
+Design:
+
+Using Supabase as the database, we used it to store the user's email and password to create a login/register feature.
+We used Resend to send a confirmation link to the user's email for authentication
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).

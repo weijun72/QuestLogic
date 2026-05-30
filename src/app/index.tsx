@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import Account from "./Account";
-import Auth from "./Auth";
+import Account from "../components/Account";
+import Auth from "../components/Auth";
 import { supabase } from "./lib/supabase";
 
 import * as Linking from "expo-linking";
-
-useEffect(() => {
-  Linking.getInitialURL().then((url) => {
-    if (url) supabase.auth.exchangeCodeForSession(url);
-  });
-}, []);
 
 export default function Index() {
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | undefined>(undefined);
 
+  useEffect(() => {
+    Linking.getInitialURL().then((url) => {
+      if (url) supabase.auth.exchangeCodeForSession(url);
+    });
+
+    const sub = Linking.addEventListener("url", ({ url }) => {
+      supabase.auth.exchangeCodeForSession(url);
+    });
+
+    return () => sub.remove();
+  }, []);
   useEffect(() => {
     // Fetch current user
     const fetchUser = async () => {
