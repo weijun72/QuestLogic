@@ -200,9 +200,3 @@ lib/
    flutter devices
    flutter run -d <device-id>
    ```
-
----
-
-## License
-
-MIT
