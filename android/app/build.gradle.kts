@@ -32,6 +32,14 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Disable ABI splits — Flutter Gradle plugin sets both splits and abiFilters
+    // which conflicts in AGP 9.0+. Using abiFilters alone is sufficient.
+    splits {
+        abi {
+            isEnable = false
+        }
+    }
 }
 
 kotlin {
