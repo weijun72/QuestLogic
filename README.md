@@ -134,17 +134,72 @@ lib/
    ```bash
    flutter run
    ```
+   If you have multiple devices connected, Flutter will prompt you to choose. To target a specific device, first list available devices:
+   ```bash
+   flutter devices
+   ```
+   Then run with the device ID shown:
+   ```bash
+   flutter run -d <device-id>
+   ```
 
-### Android Emulator (recommended)
+---
 
-Create a **Pixel 7** AVD in Android Studio with:
-- API Level 33+
-- GPU: Hardware (GLES 2.0)
-- RAM: 4096 MB
+## Running on Android
 
-```bash
-flutter run -d emulator-5554
-```
+### Android Emulator
+
+1. Open **Android Studio → Virtual Device Manager**
+2. Create a new AVD (e.g. Pixel 7, API 33+) with GPU set to **Hardware (GLES 2.0)** and at least **4096 MB RAM**
+3. Start the emulator, then:
+   ```bash
+   flutter devices          # find your emulator's device ID
+   flutter run -d <device-id>
+   ```
+   The first emulator started typically gets the ID `emulator-5554`, but always confirm with `flutter devices`.
+
+### Physical Android Device
+
+1. Enable **Developer Options** and **USB Debugging** on your device
+2. Connect via USB, then:
+   ```bash
+   flutter devices          # confirm your device appears
+   flutter run -d <device-id>
+   ```
+
+---
+
+## Running on iOS (macOS only)
+
+> iOS builds require a Mac with Xcode installed.
+
+### Prerequisites
+
+- macOS with **Xcode 15+** installed (from the App Store)
+- Xcode command-line tools: `xcode-select --install`
+- CocoaPods: `sudo gem install cocoapods`
+
+### iOS Simulator
+
+1. Open Xcode → **Window → Devices and Simulators** and start a simulator, or use:
+   ```bash
+   open -a Simulator
+   ```
+2. Then run:
+   ```bash
+   flutter devices          # find your simulator's device ID
+   flutter run -d <device-id>
+   ```
+
+### Physical iPhone/iPad
+
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. Set your **Team** under **Signing & Capabilities**
+3. Connect your device, trust the Mac on the device, then:
+   ```bash
+   flutter devices
+   flutter run -d <device-id>
+   ```
 
 ---
 
