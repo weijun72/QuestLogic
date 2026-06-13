@@ -10,20 +10,20 @@ A **skill-swap social platform** built with Flutter and Supabase. Users post wha
 
 | Tab | Description |
 |-----|-------------|
-| ?? **Home** | Feed of recent skill-swap posts from the community |
-| ? **Post** | Create a new post — title, description, skill offered & wanted |
-| ?? **Browse** | Search and browse user profiles; tap to view their posts |
-| ?? **Quests** | All community quests + your own quests in a tabbed view |
-| ?? **Chat** | Real-time conversations with other users via Supabase Realtime |
-| ?? **Profile** | Edit your username, bio, skills to teach/learn, and avatar |
+| **Home** | Feed of recent skill-swap posts from the community |
+| **Post** | Create a new post ï¿½ title, description, skill offered & wanted |
+| **Browse** | Search and browse user profiles; tap to view their posts |
+| **Quests** | All community quests + your own quests in a tabbed view |
+| **Chat** | Real-time conversations with other users via Supabase Realtime |
+| **Profile** | Edit your username, bio, skills to teach/learn, and avatar |
 
 ---
 
 ## Tech Stack
 
-- **Flutter** (Dart) — cross-platform mobile UI
-- **Supabase** — PostgreSQL database, Auth, Storage, and Realtime subscriptions
-- **image_picker** — avatar photo upload
+- **Flutter** (Dart) ï¿½ cross-platform mobile UI
+- **Supabase** ï¿½ PostgreSQL database, Auth, Storage, and Realtime subscriptions
+- **image_picker** ï¿½ avatar photo upload
 
 ---
 
@@ -37,23 +37,23 @@ lib/
     +-- auth_screen.dart       # Sign in / Sign up
     +-- profile_screen.dart    # Profile editing + avatar upload
     +-- home/
-    ¦   +-- home_screen.dart
-    ¦   +-- widgets/post_card.dart
+    ï¿½   +-- home_screen.dart
+    ï¿½   +-- widgets/post_card.dart
     +-- browse/
-    ¦   +-- browse_screen.dart
-    ¦   +-- user_profile_screen.dart
-    ¦   +-- widgets/
-    ¦       +-- skill_chip.dart
-    ¦       +-- profile_card.dart
-    ¦       +-- user_post_card.dart
+    ï¿½   +-- browse_screen.dart
+    ï¿½   +-- user_profile_screen.dart
+    ï¿½   +-- widgets/
+    ï¿½       +-- skill_chip.dart
+    ï¿½       +-- profile_card.dart
+    ï¿½       +-- user_post_card.dart
     +-- post/
-    ¦   +-- post_screen.dart
+    ï¿½   +-- post_screen.dart
     +-- quests/
-    ¦   +-- quests_screen.dart
-    ¦   +-- widgets/
-    ¦       +-- quest_tag.dart
-    ¦       +-- quest_card.dart
-    ¦       +-- quest_list.dart
+    ï¿½   +-- quests_screen.dart
+    ï¿½   +-- widgets/
+    ï¿½       +-- quest_tag.dart
+    ï¿½       +-- quest_card.dart
+    ï¿½       +-- quest_list.dart
     +-- chat/
         +-- chat_screen.dart
         +-- chat_detail_screen.dart
