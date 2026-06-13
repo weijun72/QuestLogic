@@ -21,9 +21,9 @@ A **skill-swap social platform** built with Flutter and Supabase. Users post wha
 
 ## Tech Stack
 
-- **Flutter** (Dart) � cross-platform mobile UI
-- **Supabase** � PostgreSQL database, Auth, Storage, and Realtime subscriptions
-- **image_picker** � avatar photo upload
+- **Flutter** (Dart) cross-platform mobile UI
+- **Supabase** PostgreSQL database, Auth, Storage, and Realtime subscriptions
+- **image_picker** avatar photo upload
 
 ---
 
@@ -37,23 +37,23 @@ lib/
     +-- auth_screen.dart       # Sign in / Sign up
     +-- profile_screen.dart    # Profile editing + avatar upload
     +-- home/
-    �   +-- home_screen.dart
-    �   +-- widgets/post_card.dart
+       +-- home_screen.dart
+       +-- widgets/post_card.dart
     +-- browse/
-    �   +-- browse_screen.dart
-    �   +-- user_profile_screen.dart
-    �   +-- widgets/
-    �       +-- skill_chip.dart
-    �       +-- profile_card.dart
-    �       +-- user_post_card.dart
+       +-- browse_screen.dart
+       +-- user_profile_screen.dart
+       +-- widgets/
+           +-- skill_chip.dart
+           +-- profile_card.dart
+           +-- user_post_card.dart
     +-- post/
-    �   +-- post_screen.dart
+       +-- post_screen.dart
     +-- quests/
-    �   +-- quests_screen.dart
-    �   +-- widgets/
-    �       +-- quest_tag.dart
-    �       +-- quest_card.dart
-    �       +-- quest_list.dart
+       +-- quests_screen.dart
+       +-- widgets/
+           +-- quest_tag.dart
+           +-- quest_card.dart
+           +-- quest_list.dart
     +-- chat/
         +-- chat_screen.dart
         +-- chat_detail_screen.dart
