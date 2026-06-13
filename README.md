@@ -65,40 +65,6 @@ lib/
 
 ---
 
-## Supabase Schema
-
-### `profiles`
-| Column | Type |
-|--------|------|
-| id | uuid (FK ? auth.users) |
-| username | text |
-| bio | text |
-| skillsToTeach | text |
-| skillsToLearn | text |
-| avatar_url | text |
-
-### `posts`
-| Column | Type |
-|--------|------|
-| id | uuid |
-| user_id | uuid (FK ? profiles) |
-| title | text |
-| description | text |
-| skill_offered | text |
-| skill_wanted | text |
-| created_at | timestamptz |
-
-### `messages`
-| Column | Type |
-|--------|------|
-| id | uuid |
-| sender_id | uuid (FK ? profiles) |
-| receiver_id | uuid (FK ? profiles) |
-| content | text |
-| created_at | timestamptz |
-
----
-
 ## Getting Started
 
 ### Prerequisites
