@@ -10,8 +10,8 @@ A **skill-swap social platform** built with Flutter and Supabase. Users post wha
 
 | Tab | Description |
 |-----|-------------|
-| **Home** | Feed of recent skill-swap posts from the community |
-| **Post** | Create a new post � title, description, skill offered & wanted |
+| **Home** | Feed of recent skill - swap posts from the community |
+| **Post** | Create a new post - title, description, skill offered & wanted |
 | **Browse** | Search and browse user profiles; tap to view their posts |
 | **Quests** | All community quests + your own quests in a tabbed view |
 | **Chat** | Real-time conversations with other users via Supabase Realtime |
