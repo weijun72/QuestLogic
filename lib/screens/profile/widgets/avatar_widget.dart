@@ -65,7 +65,9 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       final fileExt = image.path.split('.').last.toLowerCase();
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
 
-      await Supabase.instance.client.storage.from('avatars').uploadBinary(
+      await Supabase.instance.client.storage
+          .from('avatars')
+          .uploadBinary(
             fileName,
             bytes,
             fileOptions: FileOptions(
@@ -77,8 +79,9 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       widget.onUpload(fileName);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -100,7 +103,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                     width: size,
                     height: size,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       width: size,
                       height: size,
                       color: const Color(0xFF333333),
@@ -122,11 +125,13 @@ class _AvatarWidgetState extends State<AvatarWidget> {
           onPressed: _uploading ? null : _uploadAvatar,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF6b5a48),
-            disabledBackgroundColor:
-                const Color(0xFF6b5a48).withValues(alpha: 0.5),
+            disabledBackgroundColor: const Color(
+              0xFF6b5a48,
+            ).withValues(alpha: 0.5),
             padding: const EdgeInsets.all(12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
           child: Text(
             _uploading ? 'Uploading ...' : 'Upload',

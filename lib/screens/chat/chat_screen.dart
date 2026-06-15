@@ -28,7 +28,8 @@ class _ChatScreenState extends State<ChatScreen> {
       final data = await _supabase
           .from('messages')
           .select(
-              'id, content, created_at, sender_id, receiver_id, profiles!messages_sender_id_fkey(username)')
+            'id, content, created_at, sender_id, receiver_id, profiles!messages_sender_id_fkey(username)',
+          )
           .or('sender_id.eq.$userId,receiver_id.eq.$userId')
           .order('created_at', ascending: false)
           .limit(50);
@@ -78,60 +79,68 @@ class _ChatScreenState extends State<ChatScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _conversations.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.chat_bubble_outline,
-                                  size: 56, color: Color(0xFFc4b09a)),
-                              SizedBox(height: 12),
-                              Text('No conversations yet',
-                                  style: TextStyle(
-                                      color: Color(0xFF86939e),
-                                      fontSize: 16)),
-                              SizedBox(height: 4),
-                              Text('Browse profiles and start chatting!',
-                                  style: TextStyle(
-                                      color: Color(0xFFc4b09a),
-                                      fontSize: 13)),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            size: 56,
+                            color: Color(0xFFc4b09a),
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadConversations,
-                          child: ListView.separated(
-                            itemCount: _conversations.length,
-                            separatorBuilder: (_, __) => const Divider(
-                              height: 1,
-                              indent: 72,
-                              color: Color(0xFFe7d8c9),
+                          SizedBox(height: 12),
+                          Text(
+                            'No conversations yet',
+                            style: TextStyle(
+                              color: Color(0xFF86939e),
+                              fontSize: 16,
                             ),
-                            itemBuilder: (context, i) {
-                              final msg = _conversations[i];
-                              final currentId =
-                                  _supabase.auth.currentUser?.id ?? '';
-                              final partnerId = msg['sender_id'] == currentId
-                                  ? msg['receiver_id']
-                                  : msg['sender_id'];
-                              final partnerName =
-                                  (msg['profiles'] as Map?)?['username'] ??
-                                      'User';
-                              return ConversationTile(
-                                message: msg,
-                                currentUserId: currentId,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ChatDetailScreen(
-                                      partnerId: partnerId as String,
-                                      partnerName: partnerName as String,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
                           ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Browse profiles and start chatting!',
+                            style: TextStyle(
+                              color: Color(0xFFc4b09a),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _loadConversations,
+                      child: ListView.separated(
+                        itemCount: _conversations.length,
+                        separatorBuilder: (_, _) => const Divider(
+                          height: 1,
+                          indent: 72,
+                          color: Color(0xFFe7d8c9),
                         ),
+                        itemBuilder: (context, i) {
+                          final msg = _conversations[i];
+                          final currentId =
+                              _supabase.auth.currentUser?.id ?? '';
+                          final partnerId = msg['sender_id'] == currentId
+                              ? msg['receiver_id']
+                              : msg['sender_id'];
+                          final partnerName =
+                              (msg['profiles'] as Map?)?['username'] ?? 'User';
+                          return ConversationTile(
+                            message: msg,
+                            currentUserId: currentId,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatDetailScreen(
+                                  partnerId: partnerId as String,
+                                  partnerName: partnerName as String,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
             ),
           ],
         ),

@@ -32,7 +32,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final data = await _supabase
           .from('posts')
           .select(
-              'id, title, description, skill_offered, skill_wanted, created_at')
+            'id, title, description, skill_offered, skill_wanted, created_at',
+          )
           .eq('user_id', userId)
           .order('created_at', ascending: false);
       if (mounted) {
@@ -74,18 +75,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     child: Text(
                       username.isNotEmpty ? username[0].toUpperCase() : '?',
                       style: const TextStyle(
-                          fontSize: 32,
-                          color: Color(0xFF6b5a48),
-                          fontWeight: FontWeight.bold),
+                        fontSize: 32,
+                        color: Color(0xFF6b5a48),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     username,
                     style: const TextStyle(
-                        color: Color(0xFFe7d8c9),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                      color: Color(0xFFe7d8c9),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   if (bio.isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -93,7 +96,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       bio,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                          color: Color(0xFFc4b09a), fontSize: 13),
+                        color: Color(0xFFc4b09a),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -104,12 +109,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     children: [
                       if (teach.isNotEmpty)
                         SkillChip(
-                            label: '🎓 $teach',
-                            color: const Color(0xFFe7d8c9)),
+                          label: '🎓 $teach',
+                          color: const Color(0xFFe7d8c9),
+                        ),
                       if (learn.isNotEmpty)
                         SkillChip(
-                            label: '🔍 $learn',
-                            color: const Color(0xFFc4b09a)),
+                          label: '🔍 $learn',
+                          color: const Color(0xFFc4b09a),
+                        ),
                     ],
                   ),
                 ],
@@ -120,23 +127,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
               child: Text(
-                '${username}\'s Posts',
+                '$username\'s Posts',
                 style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF3d2e22)),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF3d2e22),
+                ),
               ),
             ),
           ),
           if (_loading)
             const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()))
+              child: Center(child: CircularProgressIndicator()),
+            )
           else if (_posts.isEmpty)
             const SliverFillRemaining(
               child: Center(
-                child: Text('No posts yet',
-                    style:
-                        TextStyle(color: Color(0xFF86939e), fontSize: 15)),
+                child: Text(
+                  'No posts yet',
+                  style: TextStyle(color: Color(0xFF86939e), fontSize: 15),
+                ),
               ),
             )
           else

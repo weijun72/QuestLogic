@@ -29,8 +29,9 @@ class _AuthScreenState extends State<AuthScreen> {
       );
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -48,13 +49,15 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Check your email for the confirmation link!')),
+            content: Text('Check your email for the confirmation link!'),
+          ),
         );
       }
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -79,7 +82,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   'https://www.image2url.com/r2/default/images/1781540424467-80882267-2567-45ff-912d-7930c02f9976.png',
                   height: 250,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const SizedBox(),
+                  errorBuilder: (_, _, _) => const SizedBox(),
                 ),
               ),
               const SizedBox(height: 20),
@@ -134,11 +137,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: _loading ? null : _signIn,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6b5a48),
-                  disabledBackgroundColor:
-                      const Color(0xFF6b5a48).withValues(alpha: 0.5),
+                  disabledBackgroundColor: const Color(
+                    0xFF6b5a48,
+                  ).withValues(alpha: 0.5),
                   padding: const EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
                 child: const Text(
                   'Sign in',
@@ -154,11 +159,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: _loading ? null : _signUp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF879183),
-                  disabledBackgroundColor:
-                      const Color(0xFF879183).withValues(alpha: 0.5),
+                  disabledBackgroundColor: const Color(
+                    0xFF879183,
+                  ).withValues(alpha: 0.5),
                   padding: const EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
                 child: const Text(
                   'Sign up',
