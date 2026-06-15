@@ -32,18 +32,29 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Future<void> _loadProfiles() async {
     try {
+      // Fetch ALL profiles (no username filter) to debug
       final data = await _supabase
           .from('profiles')
-          .select('id, username, bio, skillsToTeach, skillsToLearn, avatar_url')
-          .not('username', 'is', null)
-          .limit(50);
+          .select('id, username, bio, skillsToTeach, skillsToLearn, avatar_url');
+      debugPrint('Browse: fetched ${data.length} total profiles: $data');
       if (mounted) {
         setState(() {
           _profiles = List<Map<String, dynamic>>.from(data);
           _filtered = _profiles;
         });
+        if (data.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Query returned 0 rows – check RLS policies')),
+          );
+        }
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Browse error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
