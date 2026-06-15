@@ -71,24 +71,13 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               Container(
-                height: 110,
+                height: 250,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFfff4e9),
-                  borderRadius: BorderRadius.circular(55),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
                 child: Image.network(
-                  'https://www.image2url.com/r2/default/images/1779961505081-b5bdec8c-5dcd-477d-a779-eabbfeee7790.png',
-                  height: 100,
+                  'https://www.image2url.com/r2/default/images/1781540424467-80882267-2567-45ff-912d-7930c02f9976.png',
+                  height: 250,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => const SizedBox(),
                 ),
