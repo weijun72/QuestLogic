@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'widgets/conversation_tile.dart';
 import 'chat_detail_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -19,6 +18,26 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadConversations();
+    _subscribeRealtime();
+  }
+
+  @override
+  void dispose() {
+    _supabase.removeAllChannels();
+    super.dispose();
+  }
+
+  void _subscribeRealtime() {
+    final userId = _supabase.auth.currentUser?.id ?? '';
+    _supabase
+        .channel('chat_list_$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'messages',
+          callback: (_) => _loadConversations(),
+        )
+        .subscribe();
   }
 
   Future<void> _loadConversations() async {
@@ -28,22 +47,27 @@ class _ChatScreenState extends State<ChatScreen> {
       final data = await _supabase
           .from('messages')
           .select(
-            'id, content, created_at, sender_id, receiver_id, profiles!messages_sender_id_fkey(username)',
+            'id, content, created_at, sender_id, receiver_id, '
+            'sender:profiles!messages_sender_id_fkey(id, username), '
+            'receiver:profiles!messages_receiver_id_fkey(id, username)',
           )
           .or('sender_id.eq.$userId,receiver_id.eq.$userId')
           .order('created_at', ascending: false)
-          .limit(50);
+          .limit(100);
 
+      // Deduplicate — one entry per partner
       final seen = <String>{};
       final convs = <Map<String, dynamic>>[];
       for (final msg in List<Map<String, dynamic>>.from(data)) {
-        final partner = msg['sender_id'] == userId
-            ? msg['receiver_id']
-            : msg['sender_id'];
-        if (seen.add(partner as String)) convs.add(msg);
+        final partnerId = msg['sender_id'] == userId
+            ? msg['receiver_id'] as String
+            : msg['sender_id'] as String;
+        if (seen.add(partnerId)) convs.add(msg);
       }
+
       if (mounted) setState(() => _conversations = convs);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Chat list error: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -51,6 +75,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = _supabase.auth.currentUser?.id ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFfff4e9),
       body: SafeArea(
@@ -79,10 +105,10 @@ class _ChatScreenState extends State<ChatScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _conversations.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.chat_bubble_outline,
                             size: 56,
@@ -98,7 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Browse profiles and start chatting!',
+                            'Accept a quest to start chatting!',
                             style: TextStyle(
                               color: Color(0xFFc4b09a),
                               fontSize: 13,
@@ -111,30 +137,83 @@ class _ChatScreenState extends State<ChatScreen> {
                       onRefresh: _loadConversations,
                       child: ListView.separated(
                         itemCount: _conversations.length,
-                        separatorBuilder: (_, _) => const Divider(
+                        separatorBuilder: (_, __) => const Divider(
                           height: 1,
                           indent: 72,
                           color: Color(0xFFe7d8c9),
                         ),
                         itemBuilder: (context, i) {
                           final msg = _conversations[i];
-                          final currentId =
-                              _supabase.auth.currentUser?.id ?? '';
-                          final partnerId = msg['sender_id'] == currentId
-                              ? msg['receiver_id']
-                              : msg['sender_id'];
+                          final isMine = msg['sender_id'] == currentUserId;
+
+                          // Get partner info correctly
+                          final partnerMap = isMine
+                              ? msg['receiver'] as Map?
+                              : msg['sender'] as Map?;
+                          final partnerId =
+                              partnerMap?['id'] as String? ??
+                              (isMine ? msg['receiver_id'] : msg['sender_id'])
+                                  as String;
                           final partnerName =
-                              (msg['profiles'] as Map?)?['username'] ?? 'User';
-                          return ConversationTile(
-                            message: msg,
-                            currentUserId: currentId,
+                              partnerMap?['username'] as String? ?? 'User';
+                          final content = msg['content'] as String? ?? '';
+                          final createdAt = msg['created_at'] != null
+                              ? DateTime.tryParse(msg['created_at'])
+                              : null;
+                          final time = createdAt != null
+                              ? '${createdAt.hour}:${createdAt.minute.toString().padLeft(2, '0')}'
+                              : '';
+
+                          return ListTile(
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ChatDetailScreen(
-                                  partnerId: partnerId as String,
-                                  partnerName: partnerName as String,
+                                  partnerId: partnerId,
+                                  partnerName: partnerName,
                                 ),
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            leading: CircleAvatar(
+                              radius: 24,
+                              backgroundColor: const Color(0xFFe7d8c9),
+                              child: Text(
+                                partnerName.isNotEmpty
+                                    ? partnerName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  color: Color(0xFF6b5a48),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              partnerName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Color(0xFF3d2e22),
+                              ),
+                            ),
+                            subtitle: Text(
+                              isMine ? 'You: $content' : content,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF86939e),
+                              ),
+                            ),
+                            trailing: Text(
+                              time,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF86939e),
                               ),
                             ),
                           );

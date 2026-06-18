@@ -33,27 +33,49 @@ class _QuestsScreenState extends State<QuestsScreen>
   Future<void> _loadQuests() async {
     final userId = _supabase.auth.currentUser?.id;
     try {
+      // All quests — only non-accepted posts
+      final acceptances = await _supabase
+          .from('quest_acceptances')
+          .select('post_id');
+
+      final acceptedIds = (acceptances as List)
+          .map((a) => a['post_id'] as String)
+          .toSet();
+
       final all = await _supabase
           .from('posts')
           .select(
-              'id, title, description, skill_offered, skill_wanted, created_at, profiles(username)')
+            'id, title, description, skill_offered, skill_wanted, created_at, profiles(username)',
+          )
           .order('created_at', ascending: false)
           .limit(30);
-      final mine = userId != null
+
+      // My quests — posts I accepted
+      final myAcceptances = userId != null
           ? await _supabase
-              .from('posts')
-              .select(
-                  'id, title, description, skill_offered, skill_wanted, created_at')
-              .eq('user_id', userId)
-              .order('created_at', ascending: false)
+                .from('quest_acceptances')
+                .select(
+                  'post_id, posts(id, title, description, skill_offered, skill_wanted, created_at)',
+                )
+                .eq('acceptor_id', userId)
           : [];
+
       if (mounted) {
         setState(() {
-          _allQuests = List<Map<String, dynamic>>.from(all);
-          _myQuests = List<Map<String, dynamic>>.from(mine);
+          // Filter out accepted posts from All Quests
+          _allQuests = (List<Map<String, dynamic>>.from(
+            all,
+          )).where((p) => !acceptedIds.contains(p['id'])).toList();
+
+          // My Quests = posts I accepted
+          _myQuests = (myAcceptances as List).map((a) {
+            final post = a['posts'] as Map<String, dynamic>;
+            return post;
+          }).toList();
         });
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Quests error: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -102,13 +124,15 @@ class _QuestsScreenState extends State<QuestsScreen>
                       controller: _tabController,
                       children: [
                         QuestList(
-                            quests: _allQuests,
-                            showAuthor: true,
-                            onRefresh: _loadQuests),
+                          quests: _allQuests,
+                          showAuthor: true,
+                          onRefresh: _loadQuests,
+                        ),
                         QuestList(
-                            quests: _myQuests,
-                            showAuthor: false,
-                            onRefresh: _loadQuests),
+                          quests: _myQuests,
+                          showAuthor: false,
+                          onRefresh: _loadQuests,
+                        ),
                       ],
                     ),
             ),

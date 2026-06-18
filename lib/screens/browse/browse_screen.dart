@@ -32,29 +32,29 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Future<void> _loadProfiles() async {
     try {
-      // Fetch ALL profiles (no username filter) to debug
+      // Get accepted post IDs
+      final acceptances = await _supabase
+          .from('quest_acceptances')
+          .select('post_id');
+
+      final acceptedPostIds = (acceptances as List)
+          .map((a) => a['post_id'] as String)
+          .toSet();
+
       final data = await _supabase
           .from('profiles')
-          .select('id, username, bio, skillsToTeach, skillsToLearn, avatar_url');
-      debugPrint('Browse: fetched ${data.length} total profiles: $data');
+          .select(
+            'id, username, bio, skillsToTeach, skillsToLearn, avatar_url',
+          );
+
       if (mounted) {
         setState(() {
           _profiles = List<Map<String, dynamic>>.from(data);
           _filtered = _profiles;
         });
-        if (data.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Query returned 0 rows – check RLS policies')),
-          );
-        }
       }
     } catch (e) {
       debugPrint('Browse error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -69,9 +69,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
               final name = (p['username'] ?? '').toLowerCase();
               final teach = (p['skillsToTeach'] ?? '').toLowerCase();
               final learn = (p['skillsToLearn'] ?? '').toLowerCase();
-              return name.contains(q) ||
-                  teach.contains(q) ||
-                  learn.contains(q);
+              return name.contains(q) || teach.contains(q) || learn.contains(q);
             }).toList();
     });
   }
@@ -100,24 +98,24 @@ class _BrowseScreenState extends State<BrowseScreen> {
                   const SizedBox(height: 4),
                   const Text(
                     'Find people to swap skills with',
-                    style:
-                        TextStyle(fontSize: 14, color: Color(0xFF86939e)),
+                    style: TextStyle(fontSize: 14, color: Color(0xFF86939e)),
                   ),
                   const SizedBox(height: 14),
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search by name or skill...',
-                      prefixIcon: const Icon(Icons.search,
-                          color: Color(0xFF86939e)),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF86939e),
+                      ),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ],
@@ -127,38 +125,43 @@ class _BrowseScreenState extends State<BrowseScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _filtered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.people_outline,
-                                  size: 56, color: Color(0xFFc4b09a)),
-                              SizedBox(height: 12),
-                              Text('No users found',
-                                  style: TextStyle(
-                                      color: Color(0xFF86939e),
-                                      fontSize: 16)),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.people_outline,
+                            size: 56,
+                            color: Color(0xFFc4b09a),
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadProfiles,
-                          child: ListView.builder(
-                            padding:
-                                const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            itemCount: _filtered.length,
-                            itemBuilder: (context, i) => ProfileCard(
-                              profile: _filtered[i],
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => UserProfileScreen(
-                                      profile: _filtered[i]),
-                                ),
-                              ),
+                          SizedBox(height: 12),
+                          Text(
+                            'No users found',
+                            style: TextStyle(
+                              color: Color(0xFF86939e),
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _loadProfiles,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, i) => ProfileCard(
+                          profile: _filtered[i],
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  UserProfileScreen(profile: _filtered[i]),
                             ),
                           ),
                         ),
+                      ),
+                    ),
             ),
           ],
         ),

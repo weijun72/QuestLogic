@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-class PostCard extends StatelessWidget {
+class HomePostCard extends StatelessWidget {
   final Map<String, dynamic> post;
-  const PostCard({super.key, required this.post});
+  final VoidCallback onAccept;
+  const HomePostCard({super.key, required this.post, required this.onAccept});
 
   String _timeAgo(String? iso) {
     if (iso == null) return '';
@@ -70,7 +71,9 @@ class PostCard extends StatelessWidget {
                 Text(
                   _timeAgo(createdAt),
                   style: const TextStyle(
-                      fontSize: 11, color: Color(0xFF86939e)),
+                    fontSize: 11,
+                    color: Color(0xFF86939e),
+                  ),
                 ),
               ],
             ),
@@ -91,8 +94,7 @@ class PostCard extends StatelessWidget {
                 description,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 13, color: Color(0xFF6b5a48)),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF6b5a48)),
               ),
             ],
             if (offered.isNotEmpty || wanted.isNotEmpty) ...[
@@ -107,6 +109,27 @@ class PostCard extends StatelessWidget {
                 ],
               ),
             ],
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onAccept,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6b5a48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                child: const Text(
+                  'Accept Quest',
+                  style: TextStyle(
+                    color: Color(0xFFe7d8c9),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -114,11 +137,14 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _chip(String label, Color bg) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration:
-            BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-        child: Text(label,
-            style: const TextStyle(
-                fontSize: 11, color: Color(0xFF3d2e22))),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(fontSize: 11, color: Color(0xFF3d2e22)),
+    ),
+  );
 }
