@@ -21,6 +21,12 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _signIn() async {
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter your email')));
+      return;
+    }
     setState(() => _loading = true);
     try {
       await Supabase.instance.client.auth.signInWithPassword(
@@ -96,6 +102,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 6),
               TextField(
+                key: const Key('emailField'),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
@@ -120,6 +127,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 6),
               TextField(
+                key: const Key('passwordField'),
                 controller: _passwordController,
                 obscureText: true,
                 textCapitalization: TextCapitalization.none,
