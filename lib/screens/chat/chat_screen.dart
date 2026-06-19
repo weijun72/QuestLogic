@@ -55,6 +55,8 @@ class _ChatScreenState extends State<ChatScreen> {
           .order('created_at', ascending: false)
           .limit(100);
 
+      debugPrint('Chat: fetched ${data.length} messages: $data');
+
       // Deduplicate — one entry per partner
       final seen = <String>{};
       final convs = <Map<String, dynamic>>[];
