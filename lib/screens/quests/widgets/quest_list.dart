@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'quest_card.dart';
 
+enum QuestListMode { posted, accepted }
+
 class QuestList extends StatelessWidget {
   final List<Map<String, dynamic>> quests;
-  final bool showAuthor;
+  final QuestListMode mode;
   final Future<void> Function() onRefresh;
+  final void Function(Map<String, dynamic> post)? onDelete;
+  final void Function(Map<String, dynamic> post)? onComplete;
 
   const QuestList({
     super.key,
     required this.quests,
-    required this.showAuthor,
+    required this.mode,
     required this.onRefresh,
+    this.onDelete,
+    this.onComplete,
   });
 
   @override
@@ -19,12 +25,19 @@ class QuestList extends StatelessWidget {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.emoji_events_outlined,
-                size: 56, color: Color(0xFFc4b09a)),
-            SizedBox(height: 12),
-            Text('No quests yet',
-                style: TextStyle(color: Color(0xFF86939e), fontSize: 16)),
+          children: [
+            const Icon(
+              Icons.emoji_events_outlined,
+              size: 56,
+              color: Color(0xFFc4b09a),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              mode == QuestListMode.posted
+                  ? 'No quests posted yet'
+                  : 'No quests accepted yet',
+              style: const TextStyle(color: Color(0xFF86939e), fontSize: 16),
+            ),
           ],
         ),
       );
@@ -34,8 +47,12 @@ class QuestList extends StatelessWidget {
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         itemCount: quests.length,
-        itemBuilder: (context, i) =>
-            QuestCard(quest: quests[i], showAuthor: showAuthor),
+        itemBuilder: (context, i) => QuestCard(
+          quest: quests[i],
+          mode: mode,
+          onDelete: onDelete != null ? () => onDelete!(quests[i]) : null,
+          onComplete: onComplete != null ? () => onComplete!(quests[i]) : null,
+        ),
       ),
     );
   }

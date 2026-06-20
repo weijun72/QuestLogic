@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../chat/chat_detail_screen.dart';
 import 'widgets/post_card.dart';
+import '../../services/quest_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,20 +68,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadAcceptances() async {
     try {
-      final data = await _supabase.from('quest_acceptances').select('post_id');
-      if (mounted) {
-        setState(() {
-          _acceptedPostIds = (data as List)
-              .map((a) => a['post_id'] as String)
-              .toSet();
-        });
-      }
+      final ids = await QuestService.getAcceptedPostIds();
+      if (mounted) setState(() => _acceptedPostIds = ids);
     } catch (_) {}
   }
 
   Future<void> _acceptPost(Map<String, dynamic> post) async {
     final currentUserId = _supabase.auth.currentUser?.id;
-    final posterId = post['user_id'] as String?;
+    final posterId =
+        post['user_id']
+            as String?; // or widget.profile['id'] in user_profile_screen
     final postId = post['id'] as String?;
 
     if (currentUserId == null || posterId == null || postId == null) return;
@@ -92,20 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      await _supabase.from('quest_acceptances').insert({
-        'post_id': postId,
-        'acceptor_id': currentUserId,
-        'poster_id': posterId,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-
-      await _supabase.from('messages').insert({
-        'sender_id': currentUserId,
-        'receiver_id': posterId,
-        'content':
-            '👋 I accepted your quest: "${post['title']}"! Let\'s connect.',
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      await QuestService.acceptQuest(
+        postId: postId,
+        posterId: posterId,
+        questTitle: post['title'] ?? '',
+      );
 
       if (mounted) {
         setState(() => _acceptedPostIds.add(postId));
@@ -114,8 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          final profile = post['profiles'] as Map<String, dynamic>?;
-          final partnerName = profile?['username'] ?? 'User';
+          final partnerName = post['profiles']?['username'] ?? 'User';
           Navigator.push(
             context,
             MaterialPageRoute(

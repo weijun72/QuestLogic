@@ -8,7 +8,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://gwffhhaupuqjnvbyqxfk.supabase.co',
-    anonKey: 'sb_publishable_yoBPRKJi921JPagoPP9WPA_Ke6r8K0_',
+    publishableKey: 'sb_publishable_yoBPRKJi921JPagoPP9WPA_Ke6r8K0_',
   );
 
   runApp(const QuestLogicApp());

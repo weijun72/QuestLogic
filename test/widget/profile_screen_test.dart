@@ -10,7 +10,7 @@ void main() {
     // Initialize Supabase before any tests run
     await Supabase.initialize(
       url: 'https://gwffhhaupuqjnvbyqxfk.supabase.co',
-      anonKey: 'sb_publishable_yoBPRKJi921JPagoPP9WPA_Ke6r8K0_',
+      publishableKey: 'sb_publishable_yoBPRKJi921JPagoPP9WPA_Ke6r8K0_',
     );
   });
   group('Profile Screen', () {

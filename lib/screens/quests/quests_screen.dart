@@ -13,7 +13,7 @@ class _QuestsScreenState extends State<QuestsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _supabase = Supabase.instance.client;
-  List<Map<String, dynamic>> _allQuests = [];
+  List<Map<String, dynamic>> _postedQuests = [];
   List<Map<String, dynamic>> _myQuests = [];
   bool _loading = true;
 
@@ -32,44 +32,39 @@ class _QuestsScreenState extends State<QuestsScreen>
 
   Future<void> _loadQuests() async {
     final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
     try {
-      // All quests — only non-accepted posts
-      final acceptances = await _supabase
-          .from('quest_acceptances')
-          .select('post_id');
-
-      final acceptedIds = (acceptances as List)
-          .map((a) => a['post_id'] as String)
-          .toSet();
-
-      final all = await _supabase
+      // Quests Posted — posts created by the current user
+      final posted = await _supabase
           .from('posts')
           .select(
-            'id, title, description, skill_offered, skill_wanted, created_at, profiles(username)',
+            'id, title, description, skill_offered, skill_wanted, created_at',
           )
-          .order('created_at', ascending: false)
-          .limit(30);
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
 
-      // My quests — posts I accepted
-      final myAcceptances = userId != null
-          ? await _supabase
-                .from('quest_acceptances')
-                .select(
-                  'post_id, posts(id, title, description, skill_offered, skill_wanted, created_at)',
-                )
-                .eq('acceptor_id', userId)
-          : [];
+      // My Quests — posts I accepted, that aren't yet completed
+      final myAcceptances = await _supabase
+          .from('quest_acceptances')
+          .select(
+            'id, post_id, completed, posts(id, title, description, skill_offered, skill_wanted, created_at)',
+          )
+          .eq('acceptor_id', userId)
+          .order('created_at', ascending: false);
 
       if (mounted) {
         setState(() {
-          // Filter out accepted posts from All Quests
-          _allQuests = (List<Map<String, dynamic>>.from(
-            all,
-          )).where((p) => !acceptedIds.contains(p['id'])).toList();
+          _postedQuests = List<Map<String, dynamic>>.from(posted);
 
-          // My Quests = posts I accepted
           _myQuests = (myAcceptances as List).map((a) {
-            final post = a['posts'] as Map<String, dynamic>;
+            final post = Map<String, dynamic>.from(
+              a['posts'] as Map<String, dynamic>,
+            );
+            post['acceptance_id'] = a['id'];
+            post['completed'] = a['completed'] ?? false;
             return post;
           }).toList();
         });
@@ -79,6 +74,73 @@ class _QuestsScreenState extends State<QuestsScreen>
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _deletePost(String postId) async {
+    try {
+      await _supabase.from('posts').delete().eq('id', postId);
+      if (mounted) {
+        setState(() => _postedQuests.removeWhere((p) => p['id'] == postId));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Quest deleted')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  Future<void> _completeQuest(String acceptanceId, String postId) async {
+    try {
+      await _supabase
+          .from('quest_acceptances')
+          .update({'completed': true})
+          .eq('id', acceptanceId);
+      if (mounted) {
+        setState(() {
+          final quest = _myQuests.firstWhere((q) => q['id'] == postId);
+          quest['completed'] = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Quest marked as complete!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  void _confirmDelete(String postId, String title) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Quest'),
+        content: Text(
+          'Are you sure you want to delete "$title"? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _deletePost(postId);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -103,7 +165,7 @@ class _QuestsScreenState extends State<QuestsScreen>
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(
-                'Skill-swap requests from the community',
+                'Manage your skill-swap quests',
                 style: TextStyle(fontSize: 14, color: Color(0xFF86939e)),
               ),
             ),
@@ -113,7 +175,7 @@ class _QuestsScreenState extends State<QuestsScreen>
               unselectedLabelColor: const Color(0xFF86939e),
               indicatorColor: const Color(0xFF6b5a48),
               tabs: const [
-                Tab(text: 'All Quests'),
+                Tab(text: 'Quests Posted'),
                 Tab(text: 'My Quests'),
               ],
             ),
@@ -124,14 +186,18 @@ class _QuestsScreenState extends State<QuestsScreen>
                       controller: _tabController,
                       children: [
                         QuestList(
-                          quests: _allQuests,
-                          showAuthor: true,
+                          quests: _postedQuests,
+                          mode: QuestListMode.posted,
                           onRefresh: _loadQuests,
+                          onDelete: (post) =>
+                              _confirmDelete(post['id'], post['title'] ?? ''),
                         ),
                         QuestList(
                           quests: _myQuests,
-                          showAuthor: false,
+                          mode: QuestListMode.accepted,
                           onRefresh: _loadQuests,
+                          onComplete: (post) =>
+                              _completeQuest(post['acceptance_id'], post['id']),
                         ),
                       ],
                     ),

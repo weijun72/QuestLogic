@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
-import 'quest_tag.dart';
+import 'quest_list.dart';
+import '../../../services/widgets/skill_tag.dart';
 
 class QuestCard extends StatelessWidget {
   final Map<String, dynamic> quest;
-  final bool showAuthor;
-  const QuestCard({super.key, required this.quest, required this.showAuthor});
+  final QuestListMode mode;
+  final VoidCallback? onDelete;
+  final VoidCallback? onComplete;
+
+  const QuestCard({
+    super.key,
+    required this.quest,
+    required this.mode,
+    this.onDelete,
+    this.onComplete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +22,7 @@ class QuestCard extends StatelessWidget {
     final description = quest['description'] ?? '';
     final offered = quest['skill_offered'] ?? '';
     final wanted = quest['skill_wanted'] ?? '';
-    final profile = quest['profiles'] as Map<String, dynamic>?;
-    final author = profile?['username'] ?? '';
+    final completed = quest['completed'] == true;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -33,25 +42,38 @@ class QuestCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showAuthor && author.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  author,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF86939e),
-                    fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3d2e22),
+                    ),
                   ),
                 ),
-              ),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3d2e22),
-              ),
+                if (mode == QuestListMode.accepted && completed)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF879183).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Completed',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF879183),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             if (description.isNotEmpty) ...[
               const SizedBox(height: 4),
@@ -67,16 +89,71 @@ class QuestCard extends StatelessWidget {
               Row(
                 children: [
                   if (offered.isNotEmpty)
-                    QuestTag(
-                        label: '🎓 $offered',
-                        bg: const Color(0xFFe7d8c9)),
+                    SkillTag(label: '🎓 $offered', bg: const Color(0xFFe7d8c9)),
                   if (offered.isNotEmpty && wanted.isNotEmpty)
                     const SizedBox(width: 8),
                   if (wanted.isNotEmpty)
-                    QuestTag(
-                        label: '🔍 $wanted',
-                        bg: const Color(0xFFdce4dc)),
+                    SkillTag(label: '🔍 $wanted', bg: const Color(0xFFdce4dc)),
                 ],
+              ),
+            ],
+
+            // Delete button — Quests Posted tab
+            if (mode == QuestListMode.posted && onDelete != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onDelete,
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Colors.red,
+                  ),
+                  label: const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            // Complete button — My Quests tab
+            if (mode == QuestListMode.accepted &&
+                onComplete != null &&
+                !completed) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onComplete,
+                  icon: const Icon(
+                    Icons.check_circle_outline,
+                    size: 18,
+                    color: Color(0xFFe7d8c9),
+                  ),
+                  label: const Text(
+                    'Complete',
+                    style: TextStyle(
+                      color: Color(0xFFe7d8c9),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6b5a48),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
             ],
           ],

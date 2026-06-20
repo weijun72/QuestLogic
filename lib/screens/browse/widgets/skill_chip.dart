@@ -17,7 +17,10 @@ class SkillChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-            fontSize: 11, color: color, fontWeight: FontWeight.w600),
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

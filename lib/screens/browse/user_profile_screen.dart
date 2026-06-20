@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../chat/chat_detail_screen.dart';
 import 'widgets/skill_chip.dart';
-import 'widgets/user_post_card.dart';
+import '../../services/quest_service.dart';
+import '../../services/widgets/skill_tag.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -48,60 +49,50 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _loadAcceptances() async {
     try {
-      final data = await _supabase.from('quest_acceptances').select('post_id');
-      if (mounted) {
-        setState(() {
-          _acceptedPostIds = (data as List)
-              .map((a) => a['post_id'] as String)
-              .toSet();
-        });
-      }
+      final ids = await QuestService.getAcceptedPostIds();
+      if (mounted) setState(() => _acceptedPostIds = ids);
     } catch (_) {}
   }
 
   Future<void> _acceptPost(Map<String, dynamic> post) async {
     final currentUserId = _supabase.auth.currentUser?.id;
-    final posterId = widget.profile['id'];
-    final postId = post['id'];
+    final posterId =
+        post['user_id']
+            as String?; // or widget.profile['id'] in user_profile_screen
+    final postId = post['id'] as String?;
 
-    if (currentUserId == null || currentUserId == posterId) return;
+    if (currentUserId == null || posterId == null || postId == null) return;
+    if (currentUserId == posterId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You cannot accept your own quest')),
+      );
+      return;
+    }
 
     try {
-      // Insert acceptance
-      await _supabase.from('quest_acceptances').insert({
-        'post_id': postId,
-        'acceptor_id': currentUserId,
-        'poster_id': posterId,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-
-      // Send initial message to start chat
-      await _supabase.from('messages').insert({
-        'sender_id': currentUserId,
-        'receiver_id': posterId,
-        'content':
-            '👋 I accepted your quest: "${post['title']}"! Let\'s connect.',
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      await QuestService.acceptQuest(
+        postId: postId,
+        posterId: posterId,
+        questTitle: post['title'] ?? '',
+      );
 
       if (mounted) {
-        // Mark post as accepted locally
-        setState(() => _acceptedPostIds.add(postId as String));
-
-        // Show success and navigate to chat
+        setState(() => _acceptedPostIds.add(postId));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Quest accepted! Starting chat...')),
         );
-
         await Future.delayed(const Duration(milliseconds: 500));
-
         if (mounted) {
+          final partnerName =
+              post['profiles']?['username'] ??
+              widget.profile['username'] ??
+              'User';
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ChatDetailScreen(
-                partnerId: posterId as String,
-                partnerName: widget.profile['username'] ?? 'User',
+                partnerId: posterId,
+                partnerName: partnerName,
               ),
             ),
           );
@@ -337,9 +328,9 @@ class _PostWithAcceptCard extends StatelessWidget {
               runSpacing: 4,
               children: [
                 if (offered.isNotEmpty)
-                  _tag('🎓 $offered', const Color(0xFFe7d8c9)),
+                  SkillTag(label: '🎓 $offered', bg: const Color(0xFFe7d8c9)),
                 if (wanted.isNotEmpty)
-                  _tag('🔍 $wanted', const Color(0xFFdce4dc)),
+                  SkillTag(label: '🔍 $wanted', bg: const Color(0xFFdce4dc)),
               ],
             ),
           ],
@@ -371,16 +362,4 @@ class _PostWithAcceptCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _tag(String label, Color bg) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    decoration: BoxDecoration(
-      color: bg,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(fontSize: 11, color: Color(0xFF3d2e22)),
-    ),
-  );
 }

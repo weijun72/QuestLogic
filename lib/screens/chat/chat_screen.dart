@@ -139,7 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       onRefresh: _loadConversations,
                       child: ListView.separated(
                         itemCount: _conversations.length,
-                        separatorBuilder: (_, __) => const Divider(
+                        separatorBuilder: (_, _) => const Divider(
                           height: 1,
                           indent: 72,
                           color: Color(0xFFe7d8c9),

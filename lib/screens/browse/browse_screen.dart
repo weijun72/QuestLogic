@@ -32,15 +32,6 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Future<void> _loadProfiles() async {
     try {
-      // Get accepted post IDs
-      final acceptances = await _supabase
-          .from('quest_acceptances')
-          .select('post_id');
-
-      final acceptedPostIds = (acceptances as List)
-          .map((a) => a['post_id'] as String)
-          .toSet();
-
       final data = await _supabase
           .from('profiles')
           .select(

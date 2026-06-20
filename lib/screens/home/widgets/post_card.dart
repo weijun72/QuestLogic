@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../services/widgets/skill_tag.dart';
+import '../../../services/widgets/time_utils.dart';
 
 class HomePostCard extends StatelessWidget {
   final Map<String, dynamic> post;
   final VoidCallback onAccept;
   const HomePostCard({super.key, required this.post, required this.onAccept});
-
-  String _timeAgo(String? iso) {
-    if (iso == null) return '';
-    final dt = DateTime.tryParse(iso);
-    if (dt == null) return '';
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +61,7 @@ class HomePostCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _timeAgo(createdAt),
+                  timeAgo(createdAt),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF86939e),
@@ -103,9 +95,9 @@ class HomePostCard extends StatelessWidget {
                 spacing: 6,
                 children: [
                   if (offered.isNotEmpty)
-                    _chip('🎓 $offered', const Color(0xFFe7d8c9)),
+                    SkillTag(label: '🎓 $offered', bg: const Color(0xFFe7d8c9)),
                   if (wanted.isNotEmpty)
-                    _chip('🔍 $wanted', const Color(0xFFdce4dc)),
+                    SkillTag(label: '🔍 $wanted', bg: const Color(0xFFdce4dc)),
                 ],
               ),
             ],
@@ -135,16 +127,4 @@ class HomePostCard extends StatelessWidget {
       ),
     );
   }
-
-  Widget _chip(String label, Color bg) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    decoration: BoxDecoration(
-      color: bg,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(fontSize: 11, color: Color(0xFF3d2e22)),
-    ),
-  );
 }
