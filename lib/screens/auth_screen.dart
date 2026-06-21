@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../styles.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -22,9 +23,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signIn() async {
     if (_emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter your email')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email')),
+      );
       return;
     }
     setState(() => _loading = true);
@@ -35,9 +36,8 @@ class _AuthScreenState extends State<AuthScreen> {
       );
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -61,9 +61,8 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -73,14 +72,14 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               Container(
                 height: 250,
                 alignment: Alignment.center,
@@ -91,15 +90,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   errorBuilder: (_, _, _) => const SizedBox(),
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Email',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF86939e),
-                ),
-              ),
+              const SizedBox(height: AppSpacing.xl),
+              const Text('Email', style: AppText.label),
               const SizedBox(height: 6),
               TextField(
                 key: const Key('emailField'),
@@ -107,82 +99,33 @@ class _AuthScreenState extends State<AuthScreen> {
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
                 textCapitalization: TextCapitalization.none,
-                decoration: const InputDecoration(
+                decoration: AppDecor.outlinedField.copyWith(
                   hintText: 'email@address.com',
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF86939e)),
-                  ),
-                  contentPadding: EdgeInsets.all(12),
                 ),
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF86939e),
-                ),
-              ),
+              const SizedBox(height: AppSpacing.xs),
+              const Text('Password', style: AppText.label),
               const SizedBox(height: 6),
               TextField(
                 key: const Key('passwordField'),
                 controller: _passwordController,
                 obscureText: true,
                 textCapitalization: TextCapitalization.none,
-                decoration: const InputDecoration(
+                decoration: AppDecor.outlinedField.copyWith(
                   hintText: 'Password',
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF86939e)),
-                  ),
-                  contentPadding: EdgeInsets.all(12),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               ElevatedButton(
                 onPressed: _loading ? null : _signIn,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6b5a48),
-                  disabledBackgroundColor: const Color(
-                    0xFF6b5a48,
-                  ).withValues(alpha: 0.5),
-                  padding: const EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: const Text(
-                  'Sign in',
-                  style: TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                style: AppDecor.primaryButton(),
+                child: const Text('Sign in', style: AppText.buttonLabel),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               ElevatedButton(
                 onPressed: _loading ? null : _signUp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF879183),
-                  disabledBackgroundColor: const Color(
-                    0xFF879183,
-                  ).withValues(alpha: 0.5),
-                  padding: const EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: const Text(
-                  'Sign up',
-                  style: TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                style: AppDecor.secondaryButton(),
+                child: const Text('Sign up', style: AppText.buttonLabel),
               ),
             ],
           ),

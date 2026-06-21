@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../styles.dart';
 import 'widgets/avatar_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -95,10 +96,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final email = Supabase.instance.client.auth.currentUser?.email ?? '';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -108,63 +109,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 url: _avatarUrl.isEmpty ? null : _avatarUrl,
                 onUpload: (url) => _updateProfile(newAvatarUrl: url),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               _buildLabel('Email'),
               const SizedBox(height: 6),
               _buildDisabledInput(email),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               _buildLabel('Username'),
               const SizedBox(height: 6),
               _buildInput(_usernameController),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               _buildLabel('Bio'),
               const SizedBox(height: 6),
               _buildInput(_bioController),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               _buildLabel('Skills to Teach'),
               const SizedBox(height: 6),
               _buildInput(_skillsToTeachController),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               _buildLabel('Skills to Learn'),
               const SizedBox(height: 6),
               _buildInput(_skillsToLearnController),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               ElevatedButton(
                 onPressed: _loading ? null : () => _updateProfile(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6b5a48),
-                  disabledBackgroundColor:
-                      const Color(0xFF6b5a48).withValues(alpha: 0.5),
-                  padding: const EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                ),
+                style: AppDecor.primaryButton(),
                 child: Text(
                   _loading ? 'Loading ...' : 'Update',
-                  style: const TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppText.buttonLabel,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               ElevatedButton(
                 onPressed: () => Supabase.instance.client.auth.signOut(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF879183),
-                  padding: const EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                ),
-                child: const Text(
-                  'Sign Out',
-                  style: TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                style: AppDecor.secondaryButton(),
+                child: const Text('Sign Out', style: AppText.buttonLabel),
               ),
             ],
           ),
@@ -173,27 +151,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF86939e),
-      ),
-    );
-  }
+  Widget _buildLabel(String text) => Text(text, style: AppText.label);
 
   Widget _buildInput(TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF86939e)),
-        ),
-        contentPadding: EdgeInsets.all(12),
-      ),
+      decoration: AppDecor.outlinedField,
     );
   }
 

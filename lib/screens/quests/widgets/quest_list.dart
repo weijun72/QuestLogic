@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../styles.dart';
 import 'quest_card.dart';
 
 enum QuestListMode { posted, accepted }
@@ -29,14 +30,14 @@ class QuestList extends StatelessWidget {
             const Icon(
               Icons.emoji_events_outlined,
               size: 56,
-              color: Color(0xFFc4b09a),
+              color: AppColors.accent,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               mode == QuestListMode.posted
                   ? 'No quests posted yet'
                   : 'No quests accepted yet',
-              style: const TextStyle(color: Color(0xFF86939e), fontSize: 16),
+              style: AppText.emptyStateTitle,
             ),
           ],
         ),

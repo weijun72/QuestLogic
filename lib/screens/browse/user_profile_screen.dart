@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../chat/chat_detail_screen.dart';
-import 'widgets/skill_chip.dart';
 import '../../services/quest_service.dart';
-import '../../services/widgets/skill_tag.dart';
+import '../../styles.dart';
+import '../../widgets/initial_avatar.dart';
+import '../../widgets/skill_tag.dart';
+import '../chat/chat_detail_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -55,19 +56,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _acceptPost(Map<String, dynamic> post) async {
-    final currentUserId = _supabase.auth.currentUser?.id;
-    final posterId =
-        post['user_id']
-            as String?; // or widget.profile['id'] in user_profile_screen
+    final posterId = widget.profile['id'] as String?;
     final postId = post['id'] as String?;
-
-    if (currentUserId == null || posterId == null || postId == null) return;
-    if (currentUserId == posterId) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You cannot accept your own quest')),
-      );
-      return;
-    }
+    if (posterId == null || postId == null) return;
 
     try {
       await QuestService.acceptQuest(
@@ -81,18 +72,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Quest accepted! Starting chat...')),
         );
+
         await Future.delayed(const Duration(milliseconds: 500));
+
         if (mounted) {
-          final partnerName =
-              post['profiles']?['username'] ??
-              widget.profile['username'] ??
-              'User';
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ChatDetailScreen(
                 partnerId: posterId,
-                partnerName: partnerName,
+                partnerName: widget.profile['username'] ?? 'User',
               ),
             ),
           );
@@ -100,9 +89,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -117,16 +105,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final currentUserId = _supabase.auth.currentUser?.id;
     final isOwnProfile = currentUserId == profile['id'];
 
-    // Filter out accepted posts
-    final availablePosts = _posts
-        .where((p) => !_acceptedPostIds.contains(p['id']))
-        .toList();
+    final availablePosts =
+        _posts.where((p) => !_acceptedPostIds.contains(p['id'])).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6b5a48),
-        foregroundColor: const Color(0xFFe7d8c9),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         title: Text(username),
         elevation: 0,
       ),
@@ -134,63 +120,45 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Container(
-              color: const Color(0xFF6b5a48),
+              color: AppColors.primary,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: const Color(0xFFe7d8c9),
-                    child: Text(
-                      username.isNotEmpty ? username[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        color: Color(0xFF6b5a48),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  InitialAvatar(name: username, radius: 40, fontSize: 32),
+                  const SizedBox(height: AppSpacing.md),
                   Text(
                     username,
                     style: const TextStyle(
-                      color: Color(0xFFe7d8c9),
+                      color: AppColors.onPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   if (bio.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       bio,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Color(0xFFc4b09a),
+                        color: AppColors.accent,
                         fontSize: 13,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   Wrap(
-                    spacing: 8,
+                    spacing: AppSpacing.sm,
                     runSpacing: 6,
                     alignment: WrapAlignment.center,
                     children: [
                       if (teach.isNotEmpty)
-                        SkillChip(
-                          label: '🎓 $teach',
-                          color: const Color(0xFFe7d8c9),
-                        ),
+                        SkillChip(label: '🎓 $teach', color: AppColors.onPrimary),
                       if (learn.isNotEmpty)
-                        SkillChip(
-                          label: '🔍 $learn',
-                          color: const Color(0xFFc4b09a),
-                        ),
+                        SkillChip(label: '🔍 $learn', color: AppColors.accent),
                     ],
                   ),
-                  // Message button
                   if (!isOwnProfile) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     ElevatedButton.icon(
                       onPressed: () => Navigator.push(
                         context,
@@ -204,14 +172,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       icon: const Icon(
                         Icons.chat_bubble_outline,
                         size: 16,
-                        color: Color(0xFF6b5a48),
+                        color: AppColors.primary,
                       ),
                       label: const Text(
                         'Message',
-                        style: TextStyle(color: Color(0xFF6b5a48)),
+                        style: TextStyle(color: AppColors.primary),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFe7d8c9),
+                        backgroundColor: AppColors.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -230,7 +198,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF3d2e22),
+                  color: AppColors.textDark,
                 ),
               ),
             ),
@@ -242,10 +210,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           else if (availablePosts.isEmpty)
             const SliverFillRemaining(
               child: Center(
-                child: Text(
-                  'No available posts',
-                  style: TextStyle(color: Color(0xFF86939e), fontSize: 15),
-                ),
+                child: Text('No available posts', style: AppText.emptyStateTitle),
               ),
             )
           else
@@ -287,74 +252,45 @@ class _PostWithAcceptCard extends StatelessWidget {
     final wanted = post['skill_wanted'] ?? '';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: AppSpacing.cardMargin,
+      padding: AppSpacing.cardPadding,
+      decoration: AppDecor.card(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (title.isNotEmpty)
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3d2e22),
-              ),
-            ),
+          if (title.isNotEmpty) Text(title, style: AppText.cardTitle),
           if (description.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF6b5a48)),
+              style: AppText.cardBody,
             ),
           ],
           if (offered.isNotEmpty || wanted.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: 6,
               runSpacing: 4,
               children: [
                 if (offered.isNotEmpty)
-                  SkillTag(label: '🎓 $offered', bg: const Color(0xFFe7d8c9)),
+                  SkillTag(label: '🎓 $offered', bg: AppColors.onPrimary),
                 if (wanted.isNotEmpty)
                   SkillTag(label: '🔍 $wanted', bg: const Color(0xFFdce4dc)),
               ],
             ),
           ],
-          // Accept button — only show if viewing someone else's profile
           if (!isOwnProfile) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: onAccept,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6b5a48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                style: AppDecor.primaryButton(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                 ),
-                child: const Text(
-                  'Accept Quest',
-                  style: TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: const Text('Accept Quest', style: AppText.buttonLabel),
               ),
             ),
           ],

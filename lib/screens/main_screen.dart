@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../styles.dart';
 import 'home/home_screen.dart';
 import 'post/post_screen.dart';
 import 'browse/browse_screen.dart';
@@ -32,8 +33,8 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: const Color(0xFF2563eb),
-        unselectedItemColor: const Color(0xFF888888),
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.textMuted,
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
         items: const [

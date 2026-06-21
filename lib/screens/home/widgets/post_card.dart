@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../services/widgets/skill_tag.dart';
-import '../../../services/widgets/time_utils.dart';
+import '../../../styles.dart';
+import '../../../utils/time_utils.dart';
+import '../../../widgets/initial_avatar.dart';
+import '../../../widgets/skill_tag.dart';
 
 class HomePostCard extends StatelessWidget {
   final Map<String, dynamic> post;
@@ -18,108 +20,62 @@ class HomePostCard extends StatelessWidget {
     final createdAt = post['created_at'] as String?;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: AppSpacing.cardMargin,
+      decoration: AppDecor.card(),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: AppSpacing.cardPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: const Color(0xFFe7d8c9),
-                  child: Text(
-                    username.isNotEmpty ? username[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6b5a48),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    username,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF3d2e22),
-                    ),
-                  ),
-                ),
-                Text(
-                  timeAgo(createdAt),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF86939e),
-                  ),
-                ),
+                InitialAvatar(name: username, radius: 16, fontSize: 13),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: Text(username, style: AppText.cardTitle)),
+                Text(timeAgo(createdAt), style: AppText.cardMeta),
               ],
             ),
             if (title.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 title,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF3d2e22),
+                  color: AppColors.textDark,
                 ),
               ),
             ],
             if (description.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 description,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6b5a48)),
+                style: AppText.cardBody,
               ),
             ],
             if (offered.isNotEmpty || wanted.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Wrap(
                 spacing: 6,
                 children: [
                   if (offered.isNotEmpty)
-                    SkillTag(label: '🎓 $offered', bg: const Color(0xFFe7d8c9)),
+                    SkillTag(label: '🎓 $offered', bg: AppColors.onPrimary),
                   if (wanted.isNotEmpty)
                     SkillTag(label: '🔍 $wanted', bg: const Color(0xFFdce4dc)),
                 ],
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: onAccept,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6b5a48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                style: AppDecor.primaryButton(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                 ),
-                child: const Text(
-                  'Accept Quest',
-                  style: TextStyle(
-                    color: Color(0xFFe7d8c9),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: const Text('Accept Quest', style: AppText.buttonLabel),
               ),
             ),
           ],

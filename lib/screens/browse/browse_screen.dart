@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../styles.dart';
 import 'widgets/profile_card.dart';
 import 'user_profile_screen.dart';
 
@@ -68,45 +69,31 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              padding: AppSpacing.screenPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Browse',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF3d2e22),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  const Text('Browse', style: AppText.screenTitle),
+                  const SizedBox(height: AppSpacing.xs),
                   const Text(
                     'Find people to swap skills with',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF86939e)),
+                    style: AppText.screenSubtitle,
                   ),
                   const SizedBox(height: 14),
                   TextField(
                     controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by name or skill...',
+                    decoration: AppDecor.textField(
+                      hint: 'Search by name or skill...',
                       prefixIcon: const Icon(
                         Icons.search,
-                        color: Color(0xFF86939e),
+                        color: AppColors.textMuted,
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ],
@@ -116,43 +103,42 @@ class _BrowseScreenState extends State<BrowseScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _filtered.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(
-                            Icons.people_outline,
-                            size: 56,
-                            color: Color(0xFFc4b09a),
+                      ? const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.people_outline,
+                                size: 56,
+                                color: AppColors.accent,
+                              ),
+                              SizedBox(height: AppSpacing.md),
+                              Text(
+                                'No users found',
+                                style: AppText.emptyStateTitle,
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 12),
-                          Text(
-                            'No users found',
-                            style: TextStyle(
-                              color: Color(0xFF86939e),
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadProfiles,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        itemCount: _filtered.length,
-                        itemBuilder: (context, i) => ProfileCard(
-                          profile: _filtered[i],
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  UserProfileScreen(profile: _filtered[i]),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _loadProfiles,
+                          child: ListView.builder(
+                            padding:
+                                const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            itemCount: _filtered.length,
+                            itemBuilder: (context, i) => ProfileCard(
+                              profile: _filtered[i],
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => UserProfileScreen(
+                                    profile: _filtered[i],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
             ),
           ],
         ),

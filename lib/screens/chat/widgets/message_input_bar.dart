@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../styles.dart';
 
 class MessageInputBar extends StatelessWidget {
   final TextEditingController controller;
@@ -25,32 +26,33 @@ class MessageInputBar extends StatelessWidget {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: 'Type a message...',
-                hintStyle: const TextStyle(color: Color(0xFFc4b09a)),
+                hintStyle: const TextStyle(color: AppColors.accent),
                 filled: true,
-                fillColor: const Color(0xFFfff4e9),
+                fillColor: AppColors.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
               ),
               onSubmitted: (_) => onSend(),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           GestureDetector(
             onTap: sending ? null : onSend,
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: sending
-                    ? const Color(0xFF6b5a48).withValues(alpha: 0.5)
-                    : const Color(0xFF6b5a48),
+                    ? AppColors.primary.withValues(alpha: 0.5)
+                    : AppColors.primary,
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(Icons.send,
-                  color: Color(0xFFe7d8c9), size: 20),
+              child: const Icon(Icons.send, color: AppColors.onPrimary, size: 20),
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../styles.dart';
 
 class AvatarWidget extends StatefulWidget {
   final double size;
@@ -65,9 +66,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       final fileExt = image.path.split('.').last.toLowerCase();
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
 
-      await Supabase.instance.client.storage
-          .from('avatars')
-          .uploadBinary(
+      await Supabase.instance.client.storage.from('avatars').uploadBinary(
             fileName,
             bytes,
             fileOptions: FileOptions(
@@ -79,9 +78,8 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       widget.onUpload(fileName);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -120,26 +118,13 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                   ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
         ElevatedButton(
           onPressed: _uploading ? null : _uploadAvatar,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6b5a48),
-            disabledBackgroundColor: const Color(
-              0xFF6b5a48,
-            ).withValues(alpha: 0.5),
-            padding: const EdgeInsets.all(12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
+          style: AppDecor.primaryButton(),
           child: Text(
             _uploading ? 'Uploading ...' : 'Upload',
-            style: const TextStyle(
-              color: Color(0xFFe7d8c9),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppText.buttonLabel,
           ),
         ),
       ],

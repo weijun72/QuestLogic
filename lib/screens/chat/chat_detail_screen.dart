@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../styles.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/message_input_bar.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String partnerId;
   final String partnerName;
-  const ChatDetailScreen(
-      {super.key, required this.partnerId, required this.partnerName});
+  const ChatDetailScreen({
+    super.key,
+    required this.partnerId,
+    required this.partnerName,
+  });
 
   @override
   State<ChatDetailScreen> createState() => _ChatDetailScreenState();
@@ -41,11 +45,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       final data = await _supabase
           .from('messages')
           .select('id, content, created_at, sender_id')
-          .or('and(sender_id.eq.$userId,receiver_id.eq.${widget.partnerId}),and(sender_id.eq.${widget.partnerId},receiver_id.eq.$userId)')
+          .or(
+            'and(sender_id.eq.$userId,receiver_id.eq.${widget.partnerId}),'
+            'and(sender_id.eq.${widget.partnerId},receiver_id.eq.$userId)',
+          )
           .order('created_at', ascending: true);
       if (mounted) {
-        setState(
-            () => _messages = List<Map<String, dynamic>>.from(data));
+        setState(() => _messages = List<Map<String, dynamic>>.from(data));
         _scrollToBottom();
       }
     } catch (_) {}
@@ -61,14 +67,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           table: 'messages',
           callback: (payload) {
             final row = payload.newRecord;
-            final isRelevant =
-                (row['sender_id'] == userId &&
-                        row['receiver_id'] == widget.partnerId) ||
-                    (row['sender_id'] == widget.partnerId &&
-                        row['receiver_id'] == userId);
+            final isRelevant = (row['sender_id'] == userId &&
+                    row['receiver_id'] == widget.partnerId) ||
+                (row['sender_id'] == widget.partnerId &&
+                    row['receiver_id'] == userId);
             if (isRelevant && mounted) {
-              setState(
-                  () => _messages.add(Map<String, dynamic>.from(row)));
+              setState(() => _messages.add(Map<String, dynamic>.from(row)));
               _scrollToBottom();
             }
           },
@@ -114,10 +118,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     final userId = _supabase.auth.currentUser?.id ?? '';
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6b5a48),
-        foregroundColor: const Color(0xFFe7d8c9),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         title: Text(widget.partnerName),
         elevation: 0,
       ),

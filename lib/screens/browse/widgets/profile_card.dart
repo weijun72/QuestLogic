@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'skill_chip.dart';
+import '../../../styles.dart';
+import '../../../widgets/initial_avatar.dart';
+import '../../../widgets/skill_tag.dart';
 
 class ProfileCard extends StatelessWidget {
   final Map<String, dynamic> profile;
@@ -16,53 +18,26 @@ class ProfileCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: AppSpacing.cardMargin,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        decoration: AppDecor.card(),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: const Color(0xFFe7d8c9),
-              child: Text(
-                username.isNotEmpty ? username[0].toUpperCase() : '?',
-                style: const TextStyle(
-                  color: Color(0xFF6b5a48),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
+            InitialAvatar(name: username, radius: 24, fontSize: 18),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          username,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Color(0xFF3d2e22),
-                          ),
-                        ),
+                      Expanded(child: Text(username, style: AppText.cardTitle)),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.accent,
+                        size: 20,
                       ),
-                      const Icon(Icons.chevron_right,
-                          color: Color(0xFFc4b09a), size: 20),
                     ],
                   ),
                   if (bio.isNotEmpty) ...[
@@ -72,20 +47,18 @@ class ProfileCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF86939e)),
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   if (teach.isNotEmpty)
-                    SkillChip(
-                        label: 'Teaches: $teach',
-                        color: const Color(0xFF6b5a48)),
+                    SkillChip(label: 'Teaches: $teach', color: AppColors.primary),
                   if (teach.isNotEmpty && learn.isNotEmpty)
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                   if (learn.isNotEmpty)
-                    SkillChip(
-                        label: 'Wants: $learn',
-                        color: const Color(0xFF879183)),
+                    SkillChip(label: 'Wants: $learn', color: AppColors.secondary),
                 ],
               ),
             ),

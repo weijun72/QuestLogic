@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/quest_service.dart';
+import '../../styles.dart';
 import '../chat/chat_detail_screen.dart';
 import 'widgets/post_card.dart';
-import '../../services/quest_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -74,19 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _acceptPost(Map<String, dynamic> post) async {
-    final currentUserId = _supabase.auth.currentUser?.id;
-    final posterId =
-        post['user_id']
-            as String?; // or widget.profile['id'] in user_profile_screen
+    final posterId = post['user_id'] as String?;
     final postId = post['id'] as String?;
-
-    if (currentUserId == null || posterId == null || postId == null) return;
-    if (currentUserId == posterId) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You cannot accept your own quest')),
-      );
-      return;
-    }
+    if (posterId == null || postId == null) return;
 
     try {
       await QuestService.acceptQuest(
@@ -102,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          final partnerName = post['profiles']?['username'] ?? 'User';
+          final profile = post['profiles'] as Map<String, dynamic>?;
+          final partnerName = profile?['username'] ?? 'User';
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -116,9 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -128,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = _supabase.auth.currentUser;
     final currentUserId = user?.id;
 
-    // Filter out accepted posts and own posts
     final availablePosts = _posts
         .where(
           (p) =>
@@ -138,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadData,
@@ -146,32 +136,19 @@ class _HomeScreenState extends State<HomeScreen> {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                  padding: AppSpacing.screenPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Welcome back 👋',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF3d2e22),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user?.email ?? '',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF86939e),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                      const Text('Welcome back 👋', style: AppText.screenTitle),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(user?.email ?? '', style: AppText.screenSubtitle),
+                      const SizedBox(height: AppSpacing.xl),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF6b5a48),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Column(
@@ -180,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               'Share a skill,\nlearn something new.',
                               style: TextStyle(
-                                color: Color(0xFFe7d8c9),
+                                color: AppColors.onPrimary,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 height: 1.3,
@@ -190,20 +167,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               'Post what you can teach and what you want to learn.',
                               style: TextStyle(
-                                color: Color(0xFFc4b09a),
+                                color: AppColors.accent,
                                 fontSize: 13,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       const Text(
                         'Recent Posts',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF3d2e22),
+                          color: AppColors.textDark,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -219,34 +196,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 SliverFillRemaining(
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(AppSpacing.xxl),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: Color(0xFFc4b09a),
+                            color: AppColors.accent,
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           Text(
                             _error!,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Color(0xFF86939e),
+                              color: AppColors.textMuted,
                               fontSize: 13,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.lg),
                           ElevatedButton(
                             onPressed: _loadData,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6b5a48),
-                            ),
-                            child: const Text(
-                              'Retry',
-                              style: TextStyle(color: Color(0xFFe7d8c9)),
-                            ),
+                            style: AppDecor.primaryButton(),
+                            child: const Text('Retry', style: AppText.buttonLabel),
                           ),
                         ],
                       ),
@@ -262,23 +234,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         Icon(
                           Icons.article_outlined,
                           size: 56,
-                          color: Color(0xFFc4b09a),
+                          color: AppColors.accent,
                         ),
-                        SizedBox(height: 12),
-                        Text(
-                          'No posts yet',
-                          style: TextStyle(
-                            color: Color(0xFF86939e),
-                            fontSize: 16,
-                          ),
-                        ),
-                        SizedBox(height: 4),
+                        SizedBox(height: AppSpacing.md),
+                        Text('No posts yet', style: AppText.emptyStateTitle),
+                        SizedBox(height: AppSpacing.xs),
                         Text(
                           'Be the first to post a skill swap!',
-                          style: TextStyle(
-                            color: Color(0xFFc4b09a),
-                            fontSize: 13,
-                          ),
+                          style: AppText.emptyStateSubtitle,
                         ),
                       ],
                     ),

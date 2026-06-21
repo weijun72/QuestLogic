@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/quest_service.dart';
+import '../../styles.dart';
 import 'widgets/quest_list.dart';
 
 class QuestsScreen extends StatefulWidget {
@@ -37,7 +39,6 @@ class _QuestsScreenState extends State<QuestsScreen>
       return;
     }
     try {
-      // Quests Posted — posts created by the current user
       final posted = await _supabase
           .from('posts')
           .select(
@@ -46,7 +47,6 @@ class _QuestsScreenState extends State<QuestsScreen>
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
-      // My Quests — posts I accepted, that aren't yet completed
       final myAcceptances = await _supabase
           .from('quest_acceptances')
           .select(
@@ -60,9 +60,8 @@ class _QuestsScreenState extends State<QuestsScreen>
           _postedQuests = List<Map<String, dynamic>>.from(posted);
 
           _myQuests = (myAcceptances as List).map((a) {
-            final post = Map<String, dynamic>.from(
-              a['posts'] as Map<String, dynamic>,
-            );
+            final post =
+                Map<String, dynamic>.from(a['posts'] as Map<String, dynamic>);
             post['acceptance_id'] = a['id'];
             post['completed'] = a['completed'] ?? false;
             return post;
@@ -78,28 +77,23 @@ class _QuestsScreenState extends State<QuestsScreen>
 
   Future<void> _deletePost(String postId) async {
     try {
-      await _supabase.from('posts').delete().eq('id', postId);
+      await QuestService.deletePost(postId);
       if (mounted) {
         setState(() => _postedQuests.removeWhere((p) => p['id'] == postId));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Quest deleted')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Quest deleted')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
 
   Future<void> _completeQuest(String acceptanceId, String postId) async {
     try {
-      await _supabase
-          .from('quest_acceptances')
-          .update({'completed': true})
-          .eq('id', acceptanceId);
+      await QuestService.completeQuest(acceptanceId);
       if (mounted) {
         setState(() {
           final quest = _myQuests.firstWhere((q) => q['id'] == postId);
@@ -111,9 +105,8 @@ class _QuestsScreenState extends State<QuestsScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -136,7 +129,7 @@ class _QuestsScreenState extends State<QuestsScreen>
               Navigator.pop(ctx);
               _deletePost(postId);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -146,34 +139,27 @@ class _QuestsScreenState extends State<QuestsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFfff4e9),
+      backgroundColor: AppScaffold.backgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
-              child: Text(
-                'Quests',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3d2e22),
-                ),
-              ),
+              child: Text('Quests', style: AppText.screenTitle),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(
                 'Manage your skill-swap quests',
-                style: TextStyle(fontSize: 14, color: Color(0xFF86939e)),
+                style: AppText.screenSubtitle,
               ),
             ),
             TabBar(
               controller: _tabController,
-              labelColor: const Color(0xFF6b5a48),
-              unselectedLabelColor: const Color(0xFF86939e),
-              indicatorColor: const Color(0xFF6b5a48),
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textMuted,
+              indicatorColor: AppColors.primary,
               tabs: const [
                 Tab(text: 'Quests Posted'),
                 Tab(text: 'My Quests'),
@@ -189,15 +175,19 @@ class _QuestsScreenState extends State<QuestsScreen>
                           quests: _postedQuests,
                           mode: QuestListMode.posted,
                           onRefresh: _loadQuests,
-                          onDelete: (post) =>
-                              _confirmDelete(post['id'], post['title'] ?? ''),
+                          onDelete: (post) => _confirmDelete(
+                            post['id'],
+                            post['title'] ?? '',
+                          ),
                         ),
                         QuestList(
                           quests: _myQuests,
                           mode: QuestListMode.accepted,
                           onRefresh: _loadQuests,
-                          onComplete: (post) =>
-                              _completeQuest(post['acceptance_id'], post['id']),
+                          onComplete: (post) => _completeQuest(
+                            post['acceptance_id'],
+                            post['id'],
+                          ),
                         ),
                       ],
                     ),
