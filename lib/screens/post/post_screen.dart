@@ -15,6 +15,7 @@ class _PostScreenState extends State<PostScreen> {
   final _descriptionController = TextEditingController();
   final _offeredController = TextEditingController();
   final _wantedController = TextEditingController();
+  final _locationController = TextEditingController();
   bool _submitting = false;
 
   @override
@@ -23,6 +24,7 @@ class _PostScreenState extends State<PostScreen> {
     _descriptionController.dispose();
     _offeredController.dispose();
     _wantedController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,9 @@ class _PostScreenState extends State<PostScreen> {
         'description': _descriptionController.text.trim(),
         'skill_offered': offered,
         'skill_wanted': _wantedController.text.trim(),
+        'location': _locationController.text.trim().isEmpty
+            ? null
+            : _locationController.text.trim(),
         'created_at': DateTime.now().toIso8601String(),
       });
       if (mounted) {
@@ -50,13 +55,16 @@ class _PostScreenState extends State<PostScreen> {
         _descriptionController.clear();
         _offeredController.clear();
         _wantedController.clear();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Post created!')));
+        _locationController.clear();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Post created!')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -95,6 +103,9 @@ class _PostScreenState extends State<PostScreen> {
               const SizedBox(height: AppSpacing.lg),
               _label('Skill I want to learn'),
               _field(_wantedController, 'e.g. Spanish, Drawing, Chess'),
+              const SizedBox(height: AppSpacing.lg),
+              _label('Location'),
+              _field(_locationController, 'e.g. Clementi, Singapore'),
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
@@ -102,9 +113,6 @@ class _PostScreenState extends State<PostScreen> {
                   onPressed: _submitting ? null : _submit,
                   style: AppDecor.primaryButton(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                  ).copyWith(
-                    foregroundColor:
-                        const WidgetStatePropertyAll(AppColors.onPrimary),
                   ),
                   child: _submitting
                       ? const SizedBox(
@@ -120,6 +128,7 @@ class _PostScreenState extends State<PostScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: AppColors.onPrimary,
                           ),
                         ),
                 ),
@@ -132,16 +141,16 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textDark,
+      ),
+    ),
+  );
 
   Widget _field(TextEditingController ctrl, String hint, {int maxLines = 1}) =>
       TextField(
